@@ -51,6 +51,7 @@
 
 
 (defn convert-to-hiccup [data]
+  (let [images  ( map create-image-element data)]
   [:html
    [:head
     [:meta {:charset "utf-8"}]
@@ -64,10 +65,10 @@
        [:div {:class "shelf top"}
         [:div {:class "face top"}]
         [:div {:class "face front"}
-         (take 3 (map create-image-element data))]
+         (take 3 images)]
         [:div {:class "face back"}]
         [:dic {:class "face left"}]
-        [:div {:class= "face bottom"}]]]]]]])
+        [:div {:class= "face bottom"}]]]]]]]))
 
 (defroutes app
   (GET "/" [] (-> (display-data)
