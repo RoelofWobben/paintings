@@ -2,8 +2,7 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [compojure.core :refer :all]
-            [compojure.route :as route]
-            [ring.adapter.jetty :as ring.adapter.jetty]))
+            [ring.adapter.jetty]))
 
 
 (defn image-url-size [image]
@@ -46,9 +45,16 @@
 (defroutes app
   (GET "/" [] (display-data)))
 
+(defonce server (atom nil))
 
-(ring.adapter.jetty/run-jetty
- app {:port  8080, :join? false})
+(defn stop-server []
+  (when @server
+    (.stop @server)
+    (reset! server nil)))
 
-
+(defn start-server []
+  (stop-server)
+  (reset! server
+          (ring.adapter.jetty/run-jetty
+            #'app {:port 9000, :join? false})))
 
