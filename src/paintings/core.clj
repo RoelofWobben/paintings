@@ -3,7 +3,7 @@
             [clj-http.client :as client]
             [compojure.core :refer :all]
             [compojure.route :as route]
-            [hiccup.core :as hiccup]
+            [paintings.display :as display]
             [clojure.core.memoize :as memo]
             [ring.adapter.jetty]))
 
@@ -50,35 +50,9 @@
   (memo/ttl display-data :ttl/threshold (* 60 60 1000)))    ;; memoize display-data result for 60 minutes (in milliseconds)
 
 
-(defn create-image-element [{:keys [object-number width height url]}]
-  [:div {:class "photocard"}
-   [:img {:src url}]])
-
-
-(defn convert-to-hiccup [data]
-  (let [images  ( map create-image-element data)]
-  [:html
-   [:head
-    [:meta {:charset "utf-8"}]
-    [:title " Most popular paintings from the Rijksmuseum "]
-    [:link {:href "/css/styles.css", :rel "stylesheet"}]]
-   [:body
-    [:div {:class "scene"}
-     [:div {:class "roll-camera"}
-      [:div {:class "move-camera"}
-       [:div {:class "wallpaper"}]
-       [:div {:class "shelf top"}
-        [:div {:class "face top"}]
-        [:div {:class "face front"}
-         (take 3 images)]
-        [:div {:class "face back"}]
-        [:dic {:class "face left"}]
-        [:div {:class= "face bottom"}]]]]]]]))
-
 (defroutes app
   (GET "/" [] (-> (memo-display-data)
-                  (convert-to-hiccup)
-                  (hiccup/html)))
+                  (display/generate-html)))
   (route/resources "/")
   (GET "/favicon.ico" [] "")
 
