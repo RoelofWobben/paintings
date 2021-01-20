@@ -2,6 +2,7 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [compojure.core :refer :all]
+            [compojure.route :as route]
             [hiccup.core :as hiccup]
             [ring.adapter.jetty]))
 
@@ -45,28 +46,46 @@
 
 
 (defn create-image-element [{:keys [object-number width height url]}]
-  ;; TODO
-  )
+  [:div {:class "photocard"}
+   [:img {:src url}]])
+
 
 (defn convert-to-hiccup [data]
-  (map create-image-element data))
+  [:html
+   [:head
+    [:meta {:charset "utf-8"}]
+    [:title " Most popular paintings from the Rijksmuseum "]
+    [:link {:href "/css/styles.css", :rel "stylesheet"}]]
+   [:body
+    [:div {:class "scene"}
+     [:div {:class "roll-camera"}
+      [:div {:class "move-camera"}
+       [:div {:class "wallpaper"}]
+       [:div {:class "shelf top"}
+        [:div {:class "face top"}]
+        [:div {:class "face front"}
+         (take 3 (map create-image-element data))]
+        [:div {:class "face back"}]
+        [:dic {:class "face left"}]
+        [:div {:class= "face bottom"}]]]]]]])
 
 (defroutes app
   (GET "/" [] (-> (display-data)
                   (convert-to-hiccup)
                   (hiccup/html)))
-  (GET "/favicon.ico" [] ""))
+  (route/resources "/")
+  (GET "/favicon.ico" [] "")
 
-(defonce server (atom nil))
+  (defonce server (atom nil))
 
-(defn stop-server []
-  (when @server
-    (.stop @server)
-    (reset! server nil)))
+  (defn stop-server []
+    (when @server
+      (.stop @server)
+      (reset! server nil)))
 
-(defn start-server []
-  (stop-server)
-  (reset! server
-          (ring.adapter.jetty/run-jetty
-            #'app {:port 9000, :join? false})))
+  (defn start-server []
+    (stop-server)
+    (reset! server
+            (ring.adapter.jetty/run-jetty
+             #'app {:port 8080, :join? false}))))
 
