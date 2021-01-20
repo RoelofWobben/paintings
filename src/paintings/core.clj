@@ -2,6 +2,7 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [compojure.core :refer :all]
+            [hiccup.core :as hiccup]
             [ring.adapter.jetty]))
 
 
@@ -42,8 +43,19 @@
       :artObjects
       (take-data)))
 
+
+(defn create-image-element [{:keys [object-number width height url]}]
+  ;; TODO
+  )
+
+(defn convert-to-hiccup [data]
+  (map create-image-element data))
+
 (defroutes app
-  (GET "/" [] (display-data)))
+  (GET "/" [] (-> (display-data)
+                  (convert-to-hiccup)
+                  (hiccup/html)))
+  (GET "/favicon.ico" [] ""))
 
 (defonce server (atom nil))
 
