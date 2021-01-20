@@ -4,6 +4,7 @@
             [compojure.core :refer :all]
             [compojure.route :as route]
             [hiccup.core :as hiccup]
+            [clojure.core.memoize :as memo]
             [ring.adapter.jetty]))
 
 
@@ -45,6 +46,10 @@
       (take-data)))
 
 
+(def memo-display-data
+  (memo/ttl display-data :ttl/threshold (* 60 60 1000)))    ;; memoize display-data result for 60 minutes (in milliseconds)
+
+
 (defn create-image-element [{:keys [object-number width height url]}]
   [:div {:class "photocard"}
    [:img {:src url}]])
@@ -71,7 +76,7 @@
         [:div {:class= "face bottom"}]]]]]]]))
 
 (defroutes app
-  (GET "/" [] (-> (display-data)
+  (GET "/" [] (-> (memo-display-data)
                   (convert-to-hiccup)
                   (hiccup/html)))
   (route/resources "/")
