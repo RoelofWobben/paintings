@@ -155,18 +155,18 @@ body.view-bottom-shelf .roll-camera .move-camera {
   transform: rotateY(90deg) rotateX(90deg) translateX(199px);
 }
 .shelf.top {
-  top: 250px;
+  top: 200px;
 }
 .shelf.middle1 {
-  top: 500px;
+  top: 400px;
 }
 
 .shelf.middle2 {
-  top: 750px
+  top: 600px
 }
 
 .shelf.bottom {
-  top: 900px;
+  top: 800px;
 }
 .shelf .face {
   position: absolute;

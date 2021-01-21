@@ -25,27 +25,31 @@
    [:div {:class= "face bottom"}]])
 
 (defn display-middle2 [images]
-  [:div {:class "shelf middle1"}
+  [:div {:class "shelf middle2"}
    [:div {:class "face top"}]
    [:div {:class "face front"}
-    (nth images 3)]
+    (nth images 2)]
    [:div {:class "face back"}]
    [:dic {:class "face left"}]
    [:div {:class= "face bottom"}]])
 
 
 (defn display-bottom [images]
-  [:div {:class "shelf middle1"}
+  [:div {:class "shelf bottom"}
    [:div {:class "face top"}]
    [:div {:class "face front"}
-    (nth images 4)]
-   [:div {:class "face back"}]
-   [:dic {:class "face left"}]
-   [:div {:class= "face bottom"}]])
+    [:div {:class "photocard"}
+     [:img {:src "images/prev.png"}
+      (nth images 3)]]
+    [:div {:class "photocard"}
+     [:img {:src "images/next.jpg"}
+      [:div {:class "face back"}]
+      [:dic {:class "face left"}]
+      [:div {:class= "face bottom"}]]]]])
 
 
 (defn display-body [data]
-  (let [images  (partition 3 (map create-image-element data))]
+  (let [images  (partition-all 3 (map create-image-element data))]
     [:body
      [:div {:class "scene"}
       [:div {:class "roll-camera"}
