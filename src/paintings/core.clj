@@ -54,18 +54,18 @@
   (GET "/" [] (-> (memo-display-data)
                   (display/generate-html)))
   (route/resources "/")
-  (GET "/favicon.ico" [] "")
+  (GET "/favicon.ico" [] ""))
 
-  (defonce server (atom nil))
+(defonce server (atom nil))
 
-  (defn stop-server []
-    (when @server
-      (.stop @server)
-      (reset! server nil)))
+(defn stop-server []
+  (when @server
+    (.stop @server)
+    (reset! server nil)))
 
-  (defn start-server []
-    (stop-server)
-    (reset! server
-            (ring.adapter.jetty/run-jetty
-             #'app {:port 8080, :join? false}))))
+(defn start-server []
+  (stop-server)
+  (reset! server
+          (ring.adapter.jetty/run-jetty
+           #'app {:port 8080, :join? false})))
 
