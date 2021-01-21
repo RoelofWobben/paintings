@@ -11,7 +11,7 @@
    [:div {:class "face front"}
     (first images)]
    [:div {:class "face back"}]
-   [:dic {:class "face left"}]
+   [:div {:class "face left"}]
    [:div {:class= "face bottom"}]])
 
 
@@ -21,7 +21,7 @@
    [:div {:class "face front"}
     (second images)]
    [:div {:class "face back"}]
-   [:dic {:class "face left"}]
+   [:div {:class "face left"}]
    [:div {:class= "face bottom"}]])
 
 (defn display-middle2 [images]
@@ -30,7 +30,7 @@
    [:div {:class "face front"}
     (nth images 2)]
    [:div {:class "face back"}]
-   [:dic {:class "face left"}]
+   [:div {:class "face left"}]
    [:div {:class= "face bottom"}]])
 
 
@@ -39,13 +39,13 @@
    [:div {:class "face top"}]
    [:div {:class "face front"}
     [:div {:class "photocard"}
-     [:img {:src "images/prev.png"}
-      (nth images 3)]]
+     [:img {:src "images/prev.png"}]]
+    (nth images 3)
     [:div {:class "photocard"}
-     [:img {:src "images/next.jpg"}
-      [:div {:class "face back"}]
-      [:dic {:class "face left"}]
-      [:div {:class= "face bottom"}]]]]])
+     [:img {:src "images/next.jpg"}]]]
+   [:div {:class "face back"}]
+   [:div {:class "face left"}]
+   [:div {:class= "face bottom"}]])
 
 
 (defn display-body [data]
