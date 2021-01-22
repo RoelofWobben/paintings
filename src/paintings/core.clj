@@ -5,7 +5,8 @@
             [compojure.route :as route]
             [paintings.display :as display]
             [clojure.core.memoize :as memo]
-            [ring.adapter.jetty]))
+            [ring.adapter.jetty]
+            [ring.middleware.params :refer [wrap-params]]))
 
 
 (defn image-url-size [image]
@@ -34,10 +35,11 @@
        (map :objectNumber)
        (map assoc-image)))
 
-(defn display-data []
+(defn display-data [page]
   (-> (client/get "https://www.rijksmuseum.nl/api/nl/collection"
                   {:query-params {:key "14OGzuak"
                                   :format "json"
+                                  :p page
                                   :type "schilderij"
                                   :toppieces "True"}})
       :body
@@ -45,14 +47,16 @@
       :artObjects
       (take-data)))
 
-
 (def memo-display-data
   (memo/ttl display-data :ttl/threshold (* 60 60 1000)))    ;; memoize display-data result for 60 minutes (in milliseconds)
 
+(defn extract-page-number [request]
+  (Long/parseLong (get-in request [:query-params "pg"] "1")))
 
 (defroutes app
-  (GET "/" [] (-> (memo-display-data)
-                  (display/generate-html)))
+  (GET "/" request (let [page (extract-page-number request)]
+                     (-> (memo-display-data page)
+                         (display/generate-html page))))
   (route/resources "/")
   (GET "/favicon.ico" [] ""))
 
@@ -67,5 +71,6 @@
   (stop-server)
   (reset! server
           (ring.adapter.jetty/run-jetty
-           #'app {:port 8080, :join? false})))
+           (wrap-params #'app)
+           {:port 8080, :join? false})))
 
