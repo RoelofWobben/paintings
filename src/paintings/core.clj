@@ -11,30 +11,38 @@
            [java.util.function Function]))
 
 
-(defn image-url-size [image]
-  (let [data (select-keys image [:width :height])
-        url (get-in image [:tiles 0 :url])]
-    (assoc data :url url)))
+(defn sort-by-name [col]
+  (sort-by :name col))
 
-(defn take-image-data [image-data object-number]
-  (->> image-data
-       (sort-by :name)
-       (last)
-       (image-url-size)
-       (merge {:object-number object-number})))
+(defn prepare-tile-image-data
+  [{:keys [width height tiles]}]
+  {:width width
+   :height height
+   :url (get-in tiles [0 :url])})
 
-(defn assoc-image [object-number]
-  (-> (client/get (str "https://www.rijksmuseum.nl/api/nl/collection/" object-number "/tiles")
-                  {:query-params {:key "14OGzuak"
-                                  :format "json"}})
-      (:body)
-      (json/parse-string true)
-      (:levels)
-      (take-image-data object-number)))
+(defn fetch-smallest-tile
+  "Calls the museum API to get the tiles for a given object number.
+  Then returns the smallest tile image in the form of a map with the keys :width, :height, and :url"
+  [object-number]
+  (some-> (client/get (str "https://www.rijksmuseum.nl/api/nl/collection/" object-number "/tiles")
+                      {:query-params {:key "14OGzuak"
+                                      :format "json"}
+                       :throw-exceptions false})
+          (:body)
+          (json/parse-string true)
+          (:levels)
+          (sort-by-name)
+          (last)
+          (prepare-tile-image-data)))
+
+(defn assoc-image [{:keys [objectNumber webImage]}]
+  (-> (or (fetch-smallest-tile objectNumber)
+          webImage)
+      (select-keys [:width :height :url])
+      (merge {:object-number objectNumber})))
 
 (defn take-data [api-data]
   (->> api-data
-       (map :objectNumber)
        (pmap assoc-image)
        doall))
 
