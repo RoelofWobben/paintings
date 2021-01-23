@@ -33,7 +33,8 @@
 (defn take-data [api-data]
   (->> api-data
        (map :objectNumber)
-       (map assoc-image)))
+       (map assoc-image)
+       doall))
 
 (defn display-data [page]
   (-> (client/get "https://www.rijksmuseum.nl/api/nl/collection"
@@ -56,12 +57,12 @@
 (defn home-handler
   [request]
   (let [page (extract-page-number request)]
-    (future (memo-display-data (inc page))
-            (-> (memo-display-data page)
-                (display/generate-html page)))))
+    (future (memo-display-data (inc page)))
+    (-> (memo-display-data page)
+        (display/generate-html page))))
 
 (defroutes app
-  (GET "/" [request] home-handler request)
+  (GET "/" request (home-handler request))
   (route/resources "/")
   (GET "/favicon.ico" [] ""))
 
