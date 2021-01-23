@@ -53,10 +53,15 @@
 (defn extract-page-number [request]
   (Long/parseLong (get-in request [:query-params "pg"] "1")))
 
+(defn home-handler
+  [request]
+  (let [page (extract-page-number request)]
+    (future (memo-display-data (inc page))
+            (-> (memo-display-data page)
+                (display/generate-html page)))))
+
 (defroutes app
-  (GET "/" request (let [page (extract-page-number request)]
-                     (-> (memo-display-data page)
-                         (display/generate-html page))))
+  (GET "/" [request] home-handler request)
   (route/resources "/")
   (GET "/favicon.ico" [] ""))
 
