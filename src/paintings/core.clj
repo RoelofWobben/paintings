@@ -4,9 +4,11 @@
             [compojure.core :refer :all]
             [compojure.route :as route]
             [paintings.display :as display]
-            [clojure.core.memoize :as memo]
             [ring.adapter.jetty]
-            [ring.middleware.params :refer [wrap-params]]))
+            [ring.middleware.params :refer [wrap-params]])
+  (:import [java.util Map]
+           [java.util.concurrent ConcurrentHashMap]
+           [java.util.function Function]))
 
 
 (defn image-url-size [image]
@@ -33,7 +35,7 @@
 (defn take-data [api-data]
   (->> api-data
        (map :objectNumber)
-       (map assoc-image)
+       (pmap assoc-image)
        doall))
 
 (defn display-data [page]
@@ -48,8 +50,20 @@
       :artObjects
       (take-data)))
 
-(def memo-display-data
-  (memo/ttl display-data :ttl/threshold (* 60 60 1000)))    ;; memoize display-data result for 60 minutes (in milliseconds)
+;; The cache for display data values is a Java ConcurrentHashMap
+(def display-data-cache (ConcurrentHashMap.))
+
+(defn memo-display-data
+  [page]
+  ;; .computeIfAbsent is a method on Java's Map interface which will get a stored value for a given key
+  ;; or compute, store, and return it using some function. In case of ConcurrentHashMap, any retrieval
+  ;; operations for a key will wait if there is currently a compute for it in progress.
+  (.computeIfAbsent
+    ^Map display-data-cache
+    page
+    (reify Function                                         ;; `reify` is a macro that lets us implement Java interfaces, in this case "java.util.function.Function".
+      (apply [_ p] (display-data p)))))
+
 
 (defn extract-page-number [request]
   (Long/parseLong (get-in request [:query-params "pg"] "1")))
@@ -57,7 +71,12 @@
 (defn home-handler
   [request]
   (let [page (extract-page-number request)]
-    (future (memo-display-data (inc page)))
+    ;; pre-load next page
+    (when (< page 1000)
+      (future (memo-display-data (inc page))))
+    ;; pre-load previous page
+    (when (> page 1)
+      (future (memo-display-data (dec page))))
     (-> (memo-display-data page)
         (display/generate-html page))))
 
