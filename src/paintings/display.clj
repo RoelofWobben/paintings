@@ -43,7 +43,7 @@
        [:a {:href (str "/?pg=" (dec page-number))} [:i {:class "fas fa-chevron-left fa-10x"}]])]
     (nth images 3)
     [:div {:class "photocard"}
-     (when (< page-number 1000)
+     (when (< page-number 478)
        [:a {:href (str "/?pg=" (inc page-number))} [:i {:class "fas fa-chevron-right fa-10x"}]])]]
    [:div {:class "face back"}]
    [:div {:class "face left"}]

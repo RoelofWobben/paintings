@@ -72,7 +72,7 @@
   [request]
   (let [page (extract-page-number request)]
     ;; pre-load next page
-    (when (< page 1000)
+    (when (< page 478)
       (future (memo-display-data (inc page))))
     ;; pre-load previous page
     (when (> page 1)
